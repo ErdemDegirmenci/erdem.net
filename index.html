@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Erdem Değirmenci | Cyber Security</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+<style>
+@import 'https://fonts.googleapis.com/css?family=Inconsolata';
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  box-sizing: border-box;
+  background-color: #000000;
+  background-image: radial-gradient(#11581E, #041607), url("https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+  font-family: "Inconsolata", Helvetica, sans-serif;
+  font-size: 1.5rem;
+  color: rgba(128, 255, 128, 0.8);
+  text-shadow: 0 0 1ex #33ff33, 0 0 2px rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+}
+
+.noise {
+  pointer-events: none;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background-image: url("https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif");
+  background-repeat: no-repeat;
+  background-size: cover;
+  z-index: -1;
+  opacity: 0.02;
+}
+
+.overlay {
+  pointer-events: none;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(180deg, rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0.3) 50%, rgba(0, 0, 0, 0) 100%);
+  background-size: auto 4px;
+  z-index: 1;
+}
+
+.overlay::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  display: block;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(0deg, transparent 0%, rgba(32, 128, 32, 0.2) 2%, rgba(32, 128, 32, 0.8) 3%, rgba(32, 128, 32, 0.2) 3%, transparent 100%);
+  background-repeat: no-repeat;
+  animation: scan 7.5s linear 0s infinite;
+}
+
+@keyframes scan {
+  0% {
+    background-position: 0 -100vh;
+  }
+  35%, 100% {
+    background-position: 0 100vh;
+  }
+}
+
+.terminal {
+  box-sizing: inherit;
+  position: absolute;
+  height: 100%;
+  width: 1000px;
+  max-width: 100%;
+  padding: 4rem;
+  text-transform: uppercase;
+  overflow-y: auto;
+}
+
+.output {
+  color: rgba(128, 255, 128, 0.8);
+  text-shadow: 0 0 1px rgba(51, 255, 51, 0.4), 0 0 2px rgba(255, 255, 255, 0.8);
+}
+
+.output::before {
+  content: "> ";
+}
+
+a {
+  color: #fff;
+  text-decoration: none;
+}
+
+a::before {
+  content: "[";
+}
+
+a::after {
+  content: "]";
+}
+
+.errorcode {
+  color: white;
+}
+
+#input-line {
+  display: flex;
+  margin-top: 20px;
+}
+
+#prompt {
+  color: rgba(192, 255, 192, 0.8);
+  text-shadow: 0 0 1px rgba(51, 255, 51, 0.4), 0 0 2px rgba(255, 255, 255, 0.8);
+}
+
+#input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: rgba(192, 255, 192, 0.8);
+  font-family: inherit;
+  font-size: inherit;
+  text-shadow: 0 0 1px rgba(51, 255, 51, 0.4), 0 0 2px rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  outline: none;
+  margin-left: 5px;
+}
+
+.ascii-art {
+  white-space: pre;
+  font-family: monospace;
+  font-size: 0.8em;
+  line-height: 1;
+}
+</style>
+</head>
+<body>
+<div class="noise"></div>
+<div class="overlay"></div>
+<div class="terminal">
+  <h1>Erdem <span class="errorcode">Değİrmencİ</span></h1>
+  <p class="output">HACKING IS NOT A CRIME. IT'S AN ART OF AWARENESS</p>
+  <p class="output">FOLLOW ME ON <a href="https://www.linkedin.com/in/erdem-de%C4%9Firmenci-80204735/">LINKEDIN</a></p>
+  <div id="terminal-output"></div>
+  <div id="input-line">
+    <span id="prompt">$</span>
+    <input type="text" id="input" autofocus>
+  </div>
+</div>
+
+<script>
+const terminalOutput = document.getElementById('terminal-output');
+const input = document.getElementById('input');
+const prompt = document.getElementById('prompt');
+const terminal = document.querySelector('.terminal');
+
+function addOutput(text) {
+    const p = document.createElement('p');
+    p.classList.add('output');
+    p.innerHTML = text;
+    terminalOutput.appendChild(p);
+    terminal.scrollTop = terminal.scrollHeight;
+}
+
+const funnyResponses = [
+    "Nice try, script kiddie! But I'm not that easy to crack.",
+    "Oops! You've triggered my trap card. Better luck next time, hacker!",
+    "Ah, the classic 'random command' approach. Very 1337 of you!",
+    "Don't push me, buddy! I've got 99 problems, but a glitch ain't one.",
+    "Hack me? You can't even hack a sandwich!",
+    "Error 42: The answer to life, the universe, and everything. But not to your command.",
+    "Access denied. Please try again after completing this captcha: ████████",
+];
+
+let lastResponseIndex = -1;
+
+function getRandomFunnyResponse() {
+    let newIndex;
+    do {
+        newIndex = Math.floor(Math.random() * funnyResponses.length);
+    } while (newIndex === lastResponseIndex && funnyResponses.length > 1);
+    
+    lastResponseIndex = newIndex;
+    return funnyResponses[newIndex];
+}
+
+async function typeWriter(text, element, speed = 10) {
+    for (let i = 0; i < text.length; i++) {
+        element.innerHTML += text.charAt(i);
+        await new Promise(resolve => setTimeout(resolve, speed));
+        terminal.scrollTop = terminal.scrollHeight;
+    }
+}
+
+async function displayMetasploitConsole() {
+    const consoleContent = `
+       _____          _                           _       _ _   
+      |  ___|        | |                         | |     (_) |  
+      | |__ _ __ __ _| | ___ _ __ ___  ___ _ __ | | ___  _| |_ 
+      |  __| '__/ _\` | |/ _ \\ '_ \` _ \\/ __| '_ \\| |/ _ \\| | __|
+      | |__| | | (_| | |  __/ | | | | \\__ \\ |_) | | (_) | | |_ 
+      \\____/_|  \\__,_|_|\\___|_| |_| |_|___/ .__/|_|\\___/|_|\\__|
+                                          | |                   
+                                          |_|                   
+
+      =[ erdemsploit v6.6.6-dev                          ]
++ -- --=[ 2137 exploits - 1108 auxiliary - 344 post       ]
++ -- --=[ 596 payloads - 45 encoders - 10 nops            ]
++ -- --=[ 9 evasion                                       ]
+
+Erdemsploit tip: Tired of setting RHOSTS for modules? Try globally setting it with setg RHOSTS x.x.x.x`;
+
+    const consoleElement = document.createElement('div');
+    consoleElement.classList.add('ascii-art');
+    terminalOutput.appendChild(consoleElement);
+
+    await typeWriter(consoleContent, consoleElement, 1);
+
+    // Add the final message after a short delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    const finalMessage = document.createElement('p');
+    finalMessage.classList.add('output');
+    terminalOutput.appendChild(finalMessage);
+    await typeWriter("Just kidding, mate. Nice try!", finalMessage, 50);
+}
+
+function processCommand(command) {
+    switch(command.toLowerCase()) {
+        case 'help':
+            return 'Available commands: about, skills, contact, clear';
+        case 'about':
+            return 'Erdem Değirmenci is a cybersecurity expert passionate about ethical hacking and digital security.';
+        case 'skills':
+            return 'Skills: Penetration Testing, Endpoint Security, Network Security, Malware Analysis, Cryptography';
+        case 'contact':
+            return 'Email: mail@erdem.net | LinkedIn: linkedin.com/in/erdem-değirmenci-80204735/';
+        case 'clear':
+            terminalOutput.innerHTML = '';
+            return '';
+        case 'whoami':
+            return "Are you asking me? I think you should see a psychologist, mate. :)";
+        case 'msfconsole':
+            displayMetasploitConsole();
+            return '';
+        default:
+            return getRandomFunnyResponse();
+    }
+}
+
+input.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        const command = this.value;
+        addOutput(`$ ${command}`);
+        
+        const output = processCommand(command);
+        if (output) addOutput(output);
+
+        this.value = '';
+    }
+});
+
+// Initial focus
+input.focus();
+
+// Refocus input when clicking anywhere in the terminal
+terminal.addEventListener('click', function() {
+    input.focus();
+});
+</script>
+</body>
+</html>
